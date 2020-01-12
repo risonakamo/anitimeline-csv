@@ -15,12 +15,18 @@ const _namereplace={
     "watashinouryokuwaheikinchidetteittayone":"watashi"
 };
 
-const _nameremove=[
-
+var _nameremove=[
+    "caroletuesdaywebpaac",
+    "gochuumonwausagidesukasingforyoup",
+    "magiarecord",
+    "sounandesuka",
+    "yuruyuritenova"
 ];
 
 function main()
 {
+    _nameremove=new Set(_nameremove);
+
     var logfile=fs.readFileSync(_targetLog,{encoding:"utf8"}).split("\n");
 
     var res=[];
@@ -35,6 +41,11 @@ function main()
         }
 
         var simpleName=simplifyName(entryMatch[2]);
+
+        if (_nameremove.has(simpleName))
+        {
+            continue;
+        }
 
         if (_namereplace[simpleName])
         {
