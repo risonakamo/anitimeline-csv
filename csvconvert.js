@@ -1,9 +1,27 @@
 const fs=require("fs");
 const stringify=require("csv-stringify");
 
+const _targetLog="test.log";
+
+//replace the name on the left with the name on the right
+const _namereplace={
+    "blackfoxend":"blackfox",
+    "blackfoxh":"blackfox",
+
+    "kandagawajetgirlsuncensored":"kandagawa",
+    "kandagawajetgirlsuncut":"kandagawa",
+    "kandagawajetgirlsuncutend":"kandagawa",
+
+    "watashinouryokuwaheikinchidetteittayone":"watashi"
+};
+
+const _nameremove=[
+
+];
+
 function main()
 {
-    var logfile=fs.readFileSync("test.log",{encoding:"utf8"}).split("\n");
+    var logfile=fs.readFileSync(_targetLog,{encoding:"utf8"}).split("\n");
 
     var res=[];
     var counts={};
@@ -17,6 +35,11 @@ function main()
         }
 
         var simpleName=simplifyName(entryMatch[2]);
+
+        if (_namereplace[simpleName])
+        {
+            simpleName=_namereplace[simpleName];
+        }
 
         res.push({
             date:entryMatch[1],
