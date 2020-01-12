@@ -1,7 +1,9 @@
 const fs=require("fs");
 const stringify=require("csv-stringify");
+const _=require("lodash");
 
-const _targetLog="test.log";
+/*-- configuration --*/
+const _targetLog="test2.log";
 
 //replace the name on the left with the name on the right
 const _namereplace={
@@ -12,16 +14,26 @@ const _namereplace={
     "kandagawajetgirlsuncut":"kandagawa",
     "kandagawajetgirlsuncutend":"kandagawa",
 
-    "watashinouryokuwaheikinchidetteittayone":"watashi"
+    "watashinouryokuwaheikinchidetteittayone":"watashi",
+
+    "lovelivesunshinetheschoolidolmovieovertherainbowhm":"lovelivesunshinetheschoolidolmovieovertherainbow",
+    "caroletuesdayrawcxxxaac":"caroletuesdaywebpaac",
+
+    "tsuujoukougekigazentaikougekidenikaikougekinookaasanwasukidesuka":"okaasan",
+    "tsuujoukougekigazentaikougekidenikaikougekinookaasanwasukidesukaend":"okaasan"
 };
 
 var _nameremove=[
-    "caroletuesdaywebpaac",
-    "gochuumonwausagidesukasingforyoup",
-    "magiarecord",
-    "sounandesuka",
-    "yuruyuritenova"
+    // "caroletuesdaywebpaac",
+    // "gochuumonwausagidesukasingforyoup",
+    // "magiarecord",
+    // "sounandesuka",
+    // "yuruyuritenova"
 ];
+
+const _minimumCount=4; //items with counts that are not greater than or equal to this number
+                       //will not be included
+/*-- end configuration --*/
 
 function main()
 {
@@ -33,30 +45,37 @@ function main()
     var counts={};
     for (var x=0;x<logfile.length;x++)
     {
+        //attempt to get date and file name
         var entryMatch=logfile[x].match(/(.{10}) .{8} (.*)/);
 
+        //skip if failed
         if (!entryMatch)
         {
             continue;
         }
 
+        //reduce the name
         var simpleName=simplifyName(entryMatch[2]);
 
+        //if the name is set to be excluded, skip
         if (_nameremove.has(simpleName))
         {
             continue;
         }
 
+        //replace the name if the name is set to be replaced
         if (_namereplace[simpleName])
         {
             simpleName=_namereplace[simpleName];
         }
 
+        //add to result
         res.push({
             date:entryMatch[1],
             name:simpleName
         });
 
+        //increment the count
         if (counts[simpleName])
         {
             counts[simpleName]++;
@@ -67,6 +86,27 @@ function main()
             counts[simpleName]=1;
         }
     }
+
+    //determine which names do not have enough to meet
+    //the minimum count requirement
+    var minimumRemoveSet=_.reduce(counts,(r,x,i)=>{
+        //if it does not meet, also remove it from the counts
+        if (x<_minimumCount)
+        {
+            delete counts[i];
+            r.add(i);
+        }
+
+        return r;
+    },new Set());
+
+    //remove all things that need to be removed from the result array
+    _.remove(res,(x)=>{
+        if (minimumRemoveSet.has(x.name))
+        {
+            return true;
+        }
+    });
 
     objectAlphabetPrint(counts);
     writeoutCsv(res,"out.csv");
