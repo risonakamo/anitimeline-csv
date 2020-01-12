@@ -1,6 +1,9 @@
 {
   "name": "anitimeline-csv",
   "version": "0.0.0",
+  "scripts":{
+    "run":"node csvconvert.js"
+  },
   "dependencies": {
     "csv-stringify": "^5.3.6",
     "lodash": "^4.17.15"
