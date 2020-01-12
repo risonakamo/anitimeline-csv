@@ -1,5 +1,4 @@
 const fs=require("fs");
-const path=require("path");
 const stringify=require("csv-stringify");
 
 function main()
@@ -7,6 +6,7 @@ function main()
     var logfile=fs.readFileSync("test.log",{encoding:"utf8"}).split("\n");
 
     var res=[];
+    var counts={};
     for (var x=0;x<logfile.length;x++)
     {
         var entryMatch=logfile[x].match(/(.{10}) .{8} (.*)/);
@@ -16,12 +16,25 @@ function main()
             continue;
         }
 
+        var simpleName=simplifyName(entryMatch[2]);
+
         res.push({
             date:entryMatch[1],
-            name:simplifyName(entryMatch[2])
+            name:simpleName
         });
+
+        if (counts[simpleName])
+        {
+            counts[simpleName]++;
+        }
+
+        else
+        {
+            counts[simpleName]=1;
+        }
     }
 
+    objectAlphabetPrint(counts);
     writeoutCsv(res,"out.csv");
 }
 
@@ -29,12 +42,6 @@ function main()
 //is not the correct file type
 function simplifyName(name)
 {
-    var extension=path.extname(name);
-    if (!(extension==".mkv" || extension==".mp4"))
-    {
-        return "";
-    }
-
     return name.replace(/\[.*?\]|\.mkv|\.mp4/g,"").replace(/[^\w]|\d/g,"").toLowerCase();
 }
 
@@ -47,6 +54,18 @@ function writeoutCsv(data,outfile)
     stringify(data,{columns:Object.keys[data[0]],header:true},(err,output)=>{
         outstream.write(output);
     });
+}
+
+//print an object and its values in key alphabetical order
+function objectAlphabetPrint(dict)
+{
+    var keys=Object.keys(dict);
+    keys.sort();
+
+    for (var x=0;x<keys.length;x++)
+    {
+        console.log(`${keys[x]}: ${dict[keys[x]]}`);
+    }
 }
 
 main();
